@@ -4,73 +4,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const introOverlay = document.getElementById('intro-overlay');
     const introSound = document.getElementById('intro-sound');
     const skipBtn = document.getElementById('skip-btn');
+    const startBtn = document.getElementById('start-btn'); // New Button
     const heroContent = document.querySelector('.hero-content');
 
-    // Check Session Storage (Play once per session)
-    // If 'introShown' is present, skip the intro immediately
-    // Check Session Storage (Play once per session)
-    // DISABLED FOR TESTING: We want it to play every time now
-    // const hasSeenIntro = sessionStorage.getItem('introShown');
+    // Force strict volume
+    introSound.volume = 1.0;
 
-    // if (hasSeenIntro) {
-    //     introOverlay.style.display = 'none'; 
-    //     heroContent.classList.add('fade-in'); 
-    // } else {
-    // Play Intro (Always Attempt)
-    runIntro();
-    // }
+    // Logic:
+    // 1. Try Autoplay.
+    // 2. If success -> Add 'playing' class to overlay to start CSS animation.
+    // 3. If fail -> Show 'ENTER PORTFOLIO' button -> Wait for click -> Play -> Add class.
 
-    function runIntro() {
-        // Attempt to play sound (Graceful Fail)
-        const playPromise = introSound.play();
-
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                // If blocked (Autoplay Policy), we just log it and proceed silently
-                console.log("Autoplay prevented by browser policy.");
-                // Fallback: Play on any first interaction
-                const enableAudio = () => {
-                    introSound.play().catch(() => { });
-                    document.removeEventListener('click', enableAudio);
-                    document.removeEventListener('keydown', enableAudio);
-                    document.removeEventListener('touchstart', enableAudio);
-                };
-                document.addEventListener('click', enableAudio);
-                document.addEventListener('keydown', enableAudio);
-                document.addEventListener('touchstart', enableAudio);
-            });
-        }
-
-        // Set Timer for end of animation (3.5s match CSS)
+    const startAnimation = () => {
+        introOverlay.classList.add('playing'); // THIS starts the visual animation
         const animationDuration = 3500;
+        setTimeout(finishIntro, animationDuration);
+    };
 
-        const finishTimer = setTimeout(() => {
-            finishIntro();
-        }, animationDuration);
+    const handleAutoplayFailure = () => {
+        console.log("Autoplay blocked. Waiting for user interaction.");
+        startBtn.style.display = 'block'; // Show the button
 
-        // Skip Button Logic
-        if (skipBtn) {
-            skipBtn.addEventListener('click', () => {
-                clearTimeout(finishTimer);
-                try {
-                    introSound.pause();
-                    introSound.currentTime = 0;
-                } catch (e) { /* ignore */ }
-                finishIntro();
+        startBtn.addEventListener('click', () => {
+            introSound.play()
+                .then(() => {
+                    startBtn.style.display = 'none';
+                    startAnimation();
+                })
+                .catch(e => console.error("Audio failed even after click:", e));
+        });
+    };
+
+    // Attempt Play
+    const playPromise = introSound.play();
+
+    if (playPromise !== undefined) {
+        playPromise
+            .then(() => {
+                // Autoplay worked!
+                startAnimation();
+            })
+            .catch(error => {
+                // Autoplay blocked
+                handleAutoplayFailure();
             });
-        }
+    } else {
+        // Older browsers? Just start.
+        startAnimation();
+    }
+
+    // Skip Button Logic
+    if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+            try {
+                introSound.pause();
+                introSound.currentTime = 0;
+            } catch (e) { /* ignore */ }
+            finishIntro();
+        });
     }
 
     function finishIntro() {
+        introOverlay.classList.remove('playing'); // Cleanup
         introOverlay.classList.add('hidden');
         sessionStorage.setItem('introShown', 'true');
-
-        // Trigger Main Hero Animation
         heroContent.classList.add('fade-in');
-
-        // Stop sound just in case
         setTimeout(() => {
-            introOverlay.style.display = 'none'; // Optimize performance
+            introOverlay.style.display = 'none';
         }, 800);
     }
 

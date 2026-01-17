@@ -222,6 +222,20 @@ body {
     }
 }
 
+/* Default: Pause Animations until Audio Starts */
+.sv-logo-container,
+.sv-intro-logo,
+.sv-intro-logo::before {
+    animation-play-state: paused;
+}
+
+/* State: Playing (Audio Started) */
+.intro-overlay.playing .sv-logo-container,
+.intro-overlay.playing .sv-intro-logo,
+.intro-overlay.playing .sv-intro-logo::before {
+    animation-play-state: running;
+}
+
 .skip-btn {
     position: absolute;
     bottom: 30px;
@@ -234,8 +248,37 @@ body {
     font-size: 0.8rem;
     cursor: pointer;
     opacity: 0;
+    /* Only fade in skip when playing */
     animation: fadeInSkip 0.5s ease 1.5s forwards;
+    animation-play-state: paused;
     z-index: 10000;
+}
+
+.intro-overlay.playing .skip-btn {
+    animation-play-state: running;
+}
+
+/* Start Button (Visible if Autoplay Fails) */
+.start-btn {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 10002;
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.5);
+    transition: transform 0.2s;
+}
+
+.start-btn:hover {
+    transform: translateX(-50%) scale(1.05);
 }
 
 .skip-btn:hover {
