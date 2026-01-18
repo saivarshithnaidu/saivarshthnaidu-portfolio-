@@ -20,6 +20,25 @@
     box-sizing: border-box;
 }
 
+/* Accessibility / Focus Styles for TV & Keyboard */
+:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 4px;
+    z-index: 1000;
+}
+
+/* 4K / Large Screen Optimization */
+@media (min-width: 1800px) {
+    :root {
+        --card-width: 350px;
+        --card-height: 200px;
+    }
+
+    .hero-title {
+        font-size: 8rem;
+    }
+}
+
 body {
     background-color: var(--bg-black);
     color: var(--white);

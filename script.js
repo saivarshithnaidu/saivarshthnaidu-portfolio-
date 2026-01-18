@@ -137,3 +137,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// --- Keyboard Navigation (TV / Accessibility) ---
+document.addEventListener('keydown', (e) => {
+    // Only handle if no specific element is focused (or body is focused)
+    // implying general navigation, OR if we want to override default scroll
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        // Find the visible slider (optional optimization: find "focused" section)
+        // For simplicity, we can scroll the slider that is currently in view 
+        // or if an element inside a slider is focused, scroll that slider.
+
+        const activeElement = document.activeElement;
+        const slider = activeElement.closest('.row-container')?.querySelector('.row');
+
+        if (slider) {
+            const scrollAmount = window.innerWidth * 0.3;
+            if (e.key === 'ArrowRight') {
+                slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            } else {
+                slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            }
+        } else {
+            // If no specific slider is focused, verify if any section is visible and scroll that? 
+            // Actually, standard behavior is usually sufficient for vertical scroll.
+            // But for horizontal rows, we might want to manually focus/scroll.
+        }
+    }
+});
+
